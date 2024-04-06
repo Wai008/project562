@@ -8,9 +8,9 @@
 <link href="deck_files/libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="deck_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="deck_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.3.450">
+  <meta name="generator" content="quarto-1.4.551">
 
-  <title>project562_Hnin_Wai</title>
+  <title>Project562</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -155,7 +155,8 @@
   }
 
   .callout.callout-titled .callout-body > .callout-content > :last-child {
-    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0;
   }
 
   .callout.callout-titled .callout-icon::before {
@@ -324,34 +325,182 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">project562_Hnin_Wai</h1>
+  <h1 class="title">Project562</h1>
 
 <div class="quarto-title-authors">
 </div>
 
 </section>
-<section id="quarto" class="slide level2">
-<h2>Quarto</h2>
-<p>Quarto enables you to weave together content and executable code into a finished presentation. To learn more about Quarto presentations see <a href="https://quarto.org/docs/presentations/" class="uri">https://quarto.org/docs/presentations/</a>.</p>
-</section>
-<section id="bullets" class="slide level2">
-<h2>Bullets</h2>
-<p>When you click the <strong>Render</strong> button a document will be generated that includes:</p>
+<section id="presentation-overview" class="slide level2">
+<h2>Presentation overview</h2>
 <ul>
-<li>Content authored with markdown</li>
-<li>Output from executable code</li>
+<li>Country background</li>
+<li>Dataset description</li>
+<li>Reserach question</li>
+<li>Data visualization</li>
+<li>Key findings</li>
 </ul>
 </section>
-<section id="code" class="slide level2">
-<h2>Code</h2>
-<p>When you click the <strong>Render</strong> button a presentation will be generated that includes both content and the output of embedded code. You can embed code like this:</p>
+<section id="country-background" class="slide level2">
+<h2>Country background</h2>
+<ul>
+<li>Myanmar</li>
+</ul>
+</section>
+<section id="dataset-description" class="slide level2">
+<h2>Dataset description</h2>
+<ul>
+<li>DHS Myanmar</li>
+</ul>
+</section>
+<section id="research-question" class="slide level2">
+<h2>Research question</h2>
+<ul>
+<li>How do demographic characteristics influence knowledge and practices of contraception among different ethnic groups?</li>
+</ul>
+</section>
+<section id="data-analysis" class="slide level2">
+<h2>Data analysis</h2>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 2</code></pre>
+<pre><code>Stratified 1 - level Cluster Sampling design (with replacement)
+With (441) clusters.
+svydesign(ids = ~psu, strata = ~strat, weights = ~wt, data = dhs_data4)
+Probabilities:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.3660  0.6622  1.1479  2.3002  2.4082 12.1858 
+Stratum Sizes: 
+             1   2   3   4   5   6   7   8   9  10 11  12  13  14 15  16  17
+obs        174 331 116 352 119 375 103 378 111 495 93 345 134 454 97 463 176
+design.PSU  10  17   7  20   7  21   6  21   6  25  7  20   8  24  6  25  10
+actual.PSU  10  17   7  20   7  21   6  21   6  25  7  20   8  24  6  25  10
+            18  19  20 21  22  23  24 25  26  27  28  29  30
+obs        349 125 349 91 444 359 225 99 422 121 480 139 351
+design.PSU  21   8  20  5  24  21  12  7  23   6  27   8  19
+actual.PSU  21   8  20  5  24  21  12  7  23   6  27   8  19
+Data variables:
+ [1] "caseid"       "age"          "location"     "residence"    "education"   
+ [6] "wealth_index" "v313"         "v005"         "psu"          "strat"       
+[11] "v012"         "v301"         "v302"         "v302a"        "v304_01"     
+[16] "v304_02"      "v304_03"      "v304_04"      "v304_05"      "v304_06"     
+[21] "v304_07"      "v304_08"      "v304_09"      "v304_10"      "v304_11"     
+[26] "v304_12"      "v304_13"      "v304_14"      "v304_15"      "v304_16"     
+[31] "v304_17"      "v304_18"      "v304_19"      "v304_20"      "v305_01"     
+[36] "v305_02"      "v305_03"      "v305_04"      "v305_05"      "v305_06"     
+[41] "v305_07"      "v305_08"      "v305_09"      "v305_10"      "v305_11"     
+[46] "v305_12"      "v305_13"      "v305_14"      "v305_15"      "v305_16"     
+[51] "v305_17"      "v305_18"      "v305_19"      "v305_20"      "v307_01"     
+[56] "v307_02"      "v307_03"      "v307_04"      "v307_05"      "v307_06"     
+[61] "v307_07"      "v307_08"      "v307_09"      "v307_10"      "v307_11"     
+[66] "v307_12"      "v307_13"      "v307_14"      "v307_15"      "v307_16"     
+[71] "v307_17"      "v307_18"      "v307_19"      "v307_20"      "v312"        
+[76] "v326"         "v323"         "v501"         "v626a"        "v502"        
+[81] "wt"           "practice"    </code></pre>
 </div>
 </div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+svyglm(formula = practice ~ age + education + residence + wealth_index, 
+    design = mysurvey, family = binomial(link = "logit"))
+
+Survey design:
+svydesign(ids = ~psu, strata = ~strat, weights = ~wt, data = dhs_data4)
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   -0.22066    0.19890  -1.109  0.26794    
+age2           0.21076    0.17196   1.226  0.22106    
+age3           0.17751    0.16416   1.081  0.28022    
+age4           0.14930    0.16987   0.879  0.37998    
+age5           0.37633    0.17023   2.211  0.02762 *  
+age6          -0.24664    0.16601  -1.486  0.13816    
+age7          -1.36030    0.19164  -7.098 5.87e-12 ***
+education1     0.43349    0.10737   4.037 6.49e-05 ***
+education2     0.55521    0.12153   4.569 6.57e-06 ***
+education3     0.45510    0.15707   2.897  0.00397 ** 
+residence2    -0.26167    0.08602  -3.042  0.00251 ** 
+wealth_index2  0.14494    0.08905   1.628  0.10438    
+wealth_index3  0.15726    0.09005   1.746  0.08154 .  
+wealth_index4  0.28075    0.10880   2.581  0.01022 *  
+wealth_index5  0.33983    0.14065   2.416  0.01613 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 0.998673)
+
+Number of Fisher Scoring iterations: 4</code></pre>
+</div>
+</div>
+</section>
+<section id="data-visualization" class="slide level2">
+<h2>Data visualization</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>practice
+       0        1 
+3705.435 4053.525 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>practice
+        0         1 
+0.4775685 0.5224315 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>  education  practice         se      ci_l      ci_u
+0         0 0.3818811 0.02374390 0.3353439 0.4284183
+1         1 0.5111665 0.01122528 0.4891654 0.5331677
+2         2 0.5900106 0.01257130 0.5653713 0.6146499
+3         3 0.6125195 0.02378320 0.5659053 0.6591337</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="deck_files/figure-revealjs/unnamed-chunk-11-1.png" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>   location  practice         se      ci_l      ci_u
+1         1 0.4353668 0.03285367 0.3709748 0.4997588
+2         2 0.5448416 0.04134782 0.4638014 0.6258819
+3         3 0.4047003 0.03030843 0.3452969 0.4641037
+4         4 0.2538685 0.03342555 0.1883556 0.3193814
+5         5 0.5120245 0.03136264 0.4505549 0.5734942
+6         6 0.4399728 0.02482936 0.3913082 0.4886375
+7         7 0.6066086 0.01802592 0.5712785 0.6419388
+8         8 0.4733550 0.02896827 0.4165783 0.5301318
+9         9 0.5570094 0.02530870 0.5074053 0.6066136
+10       10 0.4501693 0.02757556 0.3961222 0.5042164
+11       11 0.3709350 0.03390055 0.3044911 0.4373789
+12       12 0.6268001 0.02199111 0.5836983 0.6699018
+13       13 0.4701454 0.02983548 0.4116689 0.5286219
+14       14 0.5555296 0.02358496 0.5093039 0.6017552
+15       15 0.5858474 0.03054885 0.5259727 0.6457220</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="deck_files/figure-revealjs/unnamed-chunk-13-1.png" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="quarto-auto-generated-content">
 <div class="footer footer-default">
 
+</div>
 </div>
 </section>
     </div>
@@ -380,7 +529,6 @@
       Reveal.initialize({
 'controlsAuto': true,
 'previewLinksAuto': false,
-'smaller': false,
 'pdfSeparateFragments': false,
 'autoAnimateEasing': "ease",
 'autoAnimateDuration': 1,
@@ -679,10 +827,27 @@
         // clear code selection
         e.clearSelection();
       });
-      function tippyHover(el, contentFn) {
+        var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+        var mailtoRegex = new RegExp(/^mailto:/);
+          var filterRegex = new RegExp('/' + window.location.host + '/');
+        var isInternal = (href) => {
+            return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+        }
+        // Inspect non-navigation links and adorn them if external
+     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+        for (var i=0; i<links.length; i++) {
+          const link = links[i];
+          if (!isInternal(link.href)) {
+            // undo the damage that might have been done by quarto-nav.js in the case of
+            // links that we want to consider external
+            if (link.dataset.originalHref !== undefined) {
+              link.href = link.dataset.originalHref;
+            }
+          }
+        }
+      function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
         const config = {
           allowHTML: true,
-          content: contentFn,
           maxWidth: 500,
           delay: 100,
           arrow: false,
@@ -692,8 +857,17 @@
           interactive: true,
           interactiveBorder: 10,
           theme: 'light-border',
-          placement: 'bottom-start'
+          placement: 'bottom-start',
         };
+        if (contentFn) {
+          config.content = contentFn;
+        }
+        if (onTriggerFn) {
+          config.onTrigger = onTriggerFn;
+        }
+        if (onUntriggerFn) {
+          config.onUntrigger = onUntriggerFn;
+        }
           config['offset'] = [0,0];
           config['maxWidth'] = 700;
         window.tippy(el, config); 
@@ -707,7 +881,11 @@
           try { href = new URL(href).hash; } catch {}
           const id = href.replace(/^#\/?/, "");
           const note = window.document.getElementById(id);
-          return note.innerHTML;
+          if (note) {
+            return note.innerHTML;
+          } else {
+            return "";
+          }
         });
       }
       const findCites = (el) => {

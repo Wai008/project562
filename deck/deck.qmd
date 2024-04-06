@@ -1,25 +1,180 @@
 ---
-title: "project562_Hnin_Wai"
+title: "Project562"
 format: revealjs
 ---
 
-## Quarto
+## Presentation overview
 
-Quarto enables you to weave together content and executable code into a finished presentation. To learn more about Quarto presentations see <https://quarto.org/docs/presentations/>.
+* Country background
+* Dataset description
+* Reserach question
+* Data visualization
+* Key findings
 
-## Bullets
-
-When you click the **Render** button a document will be generated that includes:
-
--   Content authored with markdown
--   Output from executable code
-
-## Code
-
-When you click the **Render** button a presentation will be generated that includes both content and the output of embedded code. You can embed code like this:
 
 ```{r}
-1 + 1
+library(tidyverse)
+library("haven")
+library("survey")
+
+dhs_mm <- read_csv(here::here("data", "dhs_mm.csv"))
 ```
+
+## Country background
+
+* Myanmar
+
+
+## Dataset description
+
+* DHS Myanmar
+
+## Research question 
+
+* How do demographic characteristics influence knowledge and practices of contraception among different ethnic groups? 
+
+
+## Data analysis
+
+
+```{r}
+dhs_data <- dhs_mm %>% # Selecting required variables for data analysis
+  select(caseid, v005, v013, v021, v023, v012, v024, v025, v106, v190, v301, v302, v302a, v304_01:v304_20, v305_01:v305_20, v307_01:v307_20, v312, v313, v326, v323, v501, v626a, v502)
+```
+
+
+
+```{r}
+# key variable description
+## _v005_ sample weight used for this dataset to make sample data representative of the entire population. It will be divided this variable by 1,000,000 to get the correct sampling weight.
+
+## _v021_ primary sampling unit (PSU) for women
+
+## _v023_ stratification variable used to design the sample
+
+dhs_data2 <- dhs_data %>% # creating and modifying variable names
+  select(caseid, age = v013, location = v024, residence = v025, education = v106, wealth_index = v190, v313, v005, psu = v021, strat = v023, v012, v024, v025, v106, v301, v302, v302a, v304_01:v304_20, v305_01:v305_20, v307_01:v307_20, v312, v313, v326, v323, v501, v626a, v502)
+```
+
+
+
+```{r}
+# creating new variables (sampling weight) and binary outcome
+
+dhs_data3 <- dhs_data2 %>% 
+  mutate(wt = v005/1000000) %>%
+  mutate(age = factor(age),
+         education = factor(education),
+         residence = factor(residence),
+         wealth_index = factor(wealth_index),
+         location = factor(location))
+```
+
+
+
+```{r}
+# To filter currently married and create practice variable
+
+dhs_data4 <- dhs_data3 %>% 
+  filter(v502 == 1) %>% 
+  mutate(practice = ifelse(v313 %in% c(3,2,1), 1,0))
+```
+
+
+
+```{r}
+# Creating mysurvey for sampling weight, psu and startification.
+
+mysurvey <- svydesign(ids = ~psu, strata = ~strat, weights =~ wt, data = dhs_data4)  
+
+summary(mysurvey)
+```
+
+
+
+```{r}
+# Fitting logistic regression
+
+log_model <- svyglm(practice ~ age + education + residence + wealth_index, design = mysurvey, family = binomial(link = "logit"))
+
+summary(log_model)
+```
+
+
+## Data visualization
+
+```{r}
+svytable(~practice, mysurvey) # checking other analyses
+```
+
+
+```{r}
+table1 <- prop.table(svytable(~practice, mysurvey))
+
+table1
+```
+
+
+
+```{r}
+# Education
+
+table2 <- svyby(
+  ~practice,
+  by = ~education,
+  design = mysurvey,
+  FUN = svymean,
+  vartype = c("se", "ci")
+)
+
+print(table2)
+```
+
+
+```{r}
+table2 %>% 
+  ggplot(aes(x = education, color = practice, fill=practice)) +
+  geom_bar()
+```
+
+
+
+```{r}
+# location
+
+table3 <- svyby(
+  ~practice,
+  by = ~location,
+  design = mysurvey,
+  FUN = svymean,
+  vartype = c("se", "ci")
+)
+
+print(table3)
+```
+
+```{r}
+table3 %>% 
+  ggplot(aes(x = location, fill=practice)) +
+  geom_bar()
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
