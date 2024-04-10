@@ -3,14 +3,18 @@ title: "Project562"
 format: revealjs
 ---
 
+# presentation 562
+
 ## Presentation overview
 
+
+---
 * Country background
 * Dataset description
 * Reserach question
 * Data visualization
 * Key findings
-
+---
 
 ```{r}
 library(tidyverse)
