@@ -1,0 +1,149 @@
+---
+title: "562_dashboard"
+format: dashboard
+server: shiny
+---
+
+
+```{r}
+#| context: setup
+
+# loading required packages
+
+library(tidyverse)
+library(shiny)
+library(bslib)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(sf)
+```
+
+
+```{r}
+
+# data preparation
+
+#myanmar <- read_csv("data/myanmar_map.csv")
+
+
+knowledge <- read_csv(here::here("data", "knowledge_allexp.csv"))
+practice <- read_csv(here::here("data", "practice_allexp.csv"))
+unmet <- read_csv(here::here("data", "unmet_allexp.csv"))
+local_knowledge <- read_csv(here::here("data", "local_knowledge.csv"))
+local_practice <- read_csv(here::here("data", "local_practice.csv"))
+local_unmet <- read_csv(here::here("data", "local_unmet.csv"))
+```
+
+
+```{r}
+world <- ne_countries(returnclass = "sf")
+myanmar <- ne_states(country = "Myanmar", returnclass = "sf")
+```
+
+
+```{r}
+# joining datasets and creating one dataset that includes map data and the outcome data
+
+local_knowledge <- local_knowledge %>% 
+  rename(name = location)
+
+local_practice <- local_practice %>% 
+  rename(name = location)
+
+local_unmet <- local_unmet %>% 
+  rename(name = location)
+
+myanmar_knowledge <- myanmar %>% 
+  left_join(local_knowledge, by = "name")
+
+myanmar_practice <- myanmar_knowledge %>% 
+  left_join(local_practice, by = "name")
+
+myanmar_all <- myanmar_practice %>% 
+  left_join(local_unmet, by = "name")
+
+```
+
+
+# {.sidebar}
+
+
+```{r}
+
+checkboxGroupInput("map", label = h3("Pick contraceptive:"),
+                   choices = list("knowledge" = "knowledge",
+                                  "practice" = "practice",
+                                  "unmet need" = "unmet_need"),
+                   selected = "knowledge")
+
+
+```
+
+
+
+# map
+
+```{r}
+#| context: server
+
+map_data <- reactive ({
+
+myanmar_all %>% 
+    rename(fp_knowledge = knowledge,
+           fp_practice = practice,
+           fp_unmet_need = unmet_need) %>% 
+    pivot_longer(
+    cols = starts_with("fp"), 
+    names_to = "fp_service", 
+    values_to = "fp_proportion"
+  ) %>% 
+    ggplot()+
+    geom_sf(aes(fill = input$fp_service, color = name, group = fp_proportion)) + 
+    theme_void() +
+    theme(legend.position = "none")
+
+})
+```
+
+# Plot 
+
+```{r}
+plotOutput('map')
+```
+
+# Data 
+
+```{r}
+tableOutput('data')
+```
+
+
+
+
+
+# practice map 
+
+```{r}
+practice_map <- myanmar_all %>% 
+  ggplot()+
+  geom_sf(aes(fill = practice, color = name)) +
+  theme_void() +
+  theme(legend.position = "none")
+
+practice_map
+```
+
+# unmet need map
+
+### Column
+
+```{r}
+unmet_map <- myanmar_all %>% 
+  ggplot()+
+  geom_sf(aes(fill = unmet_need, color = name)) +
+  theme_void() +
+  theme(legend.position = "none")
+
+unmet_map
+```
+
