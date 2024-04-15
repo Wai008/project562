@@ -97,24 +97,26 @@ mm_map2 <- myanmar %>%
 
 ::: aside
 
-~ 52 million population with ~ 135 ethnic groups. Can simply divide into two groups
+- 52 million population with ~ 135 ethnic groups. Has 7 states and 7 regions. 
+- "Bamar" in regions and ">100 ethnic groups" in states
 
 :::
 
-
-::: {.panel-tabset}
-
-### Administration
 
 ```{r}
 mm_map1
 ```
 
-### Ethnicity
+## Ethnicity
 
 ```{r}
 mm_map2
 ```
+
+::: aside
+
+- 52 million population with ~ 135 ethnic groups. Has 7 states and 7 regions. 
+- "Bamar" in regions and ">100 ethnic groups" in states
 
 :::
 
@@ -123,7 +125,7 @@ mm_map2
 ::: {.incremental}
 - How do demographic characteristics influence contraceptive knowledge, practices and unmet need among currently married women aged 15-49 in Myanmar?
 
-- Is there any contraceptive service disparities between States and Regions?
+- Are there any contraceptive disparities between States and Regions?
 
 - Bonus info: What are the _most used contraceptive methods_?
 :::
