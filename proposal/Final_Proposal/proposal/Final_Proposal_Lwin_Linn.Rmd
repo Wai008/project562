@@ -1,0 +1,464 @@
+---
+title: "Final_Proposal"
+author: "Hnin Thuzar Lwin & Wai Linn"
+date: "2024-03-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+# Package installation
+
+## To install "foreign" package so as to import stata dataset
+
+```{r}
+library(foreign)
+library(tidyverse)
+library(dataReporter)
+library(patchwork)
+```
+
+# SECTION 1: Introduction
+
+## Research Question
+
+How do contraceptive knowledge, practice and unmet need differ among women aged 15-49 according to demographic characteristics (age, residence - urban/rural and location - state/region, education, wealth index) in 2016? Are these characteristics associated with contraception knowledge, practice and unmet need among women aged 15-49 in Myanmar?
+
+## Background information
+
+The dataset is part of the Myanmar Demographic and Health Surveys (MDHS) 2015-16 conducted by the Ministry of Health and Sports (MoHS), Myanmar, with funding support from USAID and 3MDG. The request to use the DHS dataset, particularly in the Data Science and Data Visualization with R class, has been approved by the DHS Program. Geographically, Myanmar, also known as Burma, is located in Southeast Asia, sharing borders with several countries, including Bangladesh to the west, India to the northwest, China to the northeast, Laos to the east, and Thailand to the southeast. Administratively, it consists of 7 states, 7 regions, and 1 union territory. The total population is approximately 52 million, comprising a fairly diverse range of 135 ethnic groups. The dominant ethnicity is Bamar, accounting for 68% of the total population, with the majority residing in the regions, while ethnic minorities typically inhabit the states and remote mountainous areas.
+
+The “weighted” sample size, depending on the population size of the respective state and region, and the sampling method were designed to represent the national population aged 15-49. Hence, the survey sample is considered to be representative at the national and state/regional levels as well as for urban and rural areas. The data collection of the MDHS was conducted in 2015-16, and unfortunately, that is the only DHS-type survey that was done in Myanmar. In February 2021, the military overthrew the democratically elected government, resulting in political instability and severe internal conflicts. Thereby, all subsequent survey plannings were suspended to date, and therefore, although it seems fairly outdated, we assume the survey findings can still represent the current situation since the progress in all sectors, including healthcare, economy, and education, has been halted since the coup.
+
+The survey includes comprehensive information on household and individual levels of housing and individual characteristics, reproductive health, maternal and child health, immunization, nutrition, HIV, TB, and malaria. In this proposed data analysis plan, we will specifically focus on family planning knowledge and practices of women aged 15-49, with a total of 12,885 participants. The variables include individual characteristics, type of residence/regional location, education status, knowledge and practices related to family planning.
+
+# SECTION 2: Data
+
+## Importing data
+
+```{r}
+dhs_mm <- read_csv("data/dhs_mm_original.csv")
+
+```
+
+
+
+## Selecting required variables for data analysis
+
+```{r}
+data_selection <- dhs_mm %>% 
+  select(caseid, v012, v024, v025, v106, v190, v301, v302, v302a, v304_01:v304_20, v305_01:v305_20, v307_01:v307_20, v312, v313, v326, v323, v501, v502, v626a, v502)
+```
+
+## Renaming variables based on original DHS codebook
+
+```{r}
+dhs_draft <- data_selection %>% 
+  mutate(
+    region = case_when(v024 == 1 ~ "Kachin",
+                       v024 == 2 ~ "Kayah",
+                       v024 == 3 ~ "Kayin",
+                       v024 == 4 ~ "Chin",
+                       v024 == 5 ~ "Sagaing",
+                       v024 == 6 ~ "Tanintharyi",
+                       v024 == 7 ~ "Bago",
+                       v024 == 8 ~ "Magway",
+                       v024 == 9 ~ "Mandalay",
+                       v024 == 10 ~ "Mon",
+                       v024 == 11 ~ "Rakhine",
+                       v024 == 12 ~ "Yangon",
+                       v024 == 13 ~ "Shan",
+                       v024 == 14 ~ "Ayeyarwady",
+                       v024 == 15 ~ "Naypyitaw"),
+    residence = case_when(v025 == 1 ~ "urban",
+                          v025 == 2 ~ "rural"),
+    education = case_when(v106 == 0 ~ "no_education",
+                          v106 == 1 ~ "primary",
+                          v106 == 2 ~ "secondary",
+                          v106 == 3 ~ "higher"),
+    methods = case_when(v312 == 0 ~ "no_use",
+                        v312 == 1 ~ "pill",
+                        v312 == 2 ~ "IUD",
+                        v312 == 3 ~ "injection", 
+                        v312 == 5 ~ "male_condom",
+                        v312 == 6 ~ "female_sterilization",
+                        v312 == 7 ~ "male_sterilization",
+                        v312 == 8 ~ "periodic_absteinence",
+                        v312 == 9 ~ "withdrawal",
+                        v312 == 10 ~ "other_traditional",
+                        v312 == 11 ~ "implant",
+                        v312 == 13 ~ "lac_amenorrhoea",
+                        v312 == 17 ~ "other_modern"),
+    knowledge = case_when(v301 == 0 ~ "no_knowledge",
+                          v301 == 1 | v301 == 2  ~ "traditional",
+                          v301 == 3 ~ "modern"),
+    practice = case_when(v313 == 0 ~ "not_current_use",
+                         v313 == 1 | v313 == 2 ~ "traditional",
+                         v313 == 3 ~ "modern"),
+    marital_status = case_when(v502 == 0 ~"not_married",
+                               v502 == 1 ~"married")
+  ) %>% 
+  rename(age = v012,
+         wealth_index = v190,
+         unmet_need = v626a)
+
+```
+
+## Final dataset
+
+```{r}
+dhs_final <- dhs_draft %>% 
+  select(caseid, age, marital_status, region, residence, education, wealth_index, methods, knowledge, practice, unmet_need)
+```
+
+## Saving final dataset
+
+### This final dataset will be used for data analysis.
+
+```{r}
+#write_csv(dhs_final, "dhs_mm_final.csv")
+```
+
+## Codebook
+
+```{r}
+#makeCodebook(dhs_final, vol = "1", reportTitle = "Codebook for Project Proposal", file = "codebook_proposal_HL_WL.Rmd")
+```
+
+# SECTION 3: Data Analysis Plan
+
+-   Myanmar has diverse ethnic groups and is home to longest civil war in the world between pro-bamar military and ethnic armed groups since 1962. The dominant ethnicity is Bamar, accounting for 68% of the total population, with the majority residing in the regions, while ethnic minorities typically inhabit the states and remote mountainous areas. Among different states and regions, Chin, Kachin, Kayin, and Rakhine states have been the most affected areas by armed conflicts. Hypothetically, there are significant health disparities between people, especially ethnic minorities living in conflicted-affected states, and those in politically stable regions in terms of health quality and service accessibility. In regards to our research question, we assume that demographic characteristics can be major influencing factors for family planning in Myanmar because of its diverse nature and conflict situations. Therefore, our data analysis will assess how these characteristics associate with the knowledge, practice and unmet needs of women aged 15-49 and will present the findings through visualization and multivariate regression model stratified by respective predictor variables.
+
+The following steps will be done throughout the data analysis process;
+
+1.  Key variables are extracted from original DHS Myanmar dataset 2015/16.
+
+2.  Use data visualization based upon predictor variables (age, location, residence, education, wealth index) and outcome variables (knowledge, attitude, unmet needs.
+
+3.  Fit the logistic regression model based on binary outcome variables stratifying by predictor variables.
+
+Additional note: current visualizations and data analysis are preliminary results and will be modified to be more complex and professional look.
+
+### Proportion of knowledge of contraceptive methods among survey respondents
+
+```{r}
+knowledge_proportion <- table(dhs_final$knowledge)
+
+slice_colors <- c("blue", "green", "brown")
+
+pie_k <- pie(knowledge_proportion, 
+    main = "Proportion of Knowledge of Contraceptive Methods among Women aged 15-49 years",
+    col = slice_colors,
+    cex = 1,
+    radius = 0.9,
+    border = NA, 
+    angle = 45, 
+    labels = paste(names(knowledge_proportion), ", ", knowledge_proportion, ", ", round(100 * knowledge_proportion / sum(knowledge_proportion), 1), "%", sep = ""))
+```
+
+### Knowledge of contraceptive methods among women aged 15-49 years by their residence
+
+```{r}
+
+knowledge_levels <- c("modern", "traditional", "no_knowledge")
+
+plot_knowledge_residence <- dhs_final %>% 
+  filter(!is.na(residence)) %>% 
+  ggplot(aes(x = residence, fill = knowledge)) +
+  geom_bar() +
+  scale_fill_manual(values = c("blue", "green", "brown"),
+                    labels = knowledge_levels) +
+  labs(title = "Knowledge of Contraceptive Methods by rural/urban stratum",
+       x = "Residence", y = "Number of Respondents", fill = "Contraceptive Methods") + 
+  theme(legend.position = "right", plot.title = element_text(size = 8)) +
+  ylim(0, 10000)
+plot_knowledge_residence
+```
+
+### Knowledge of contraceptive methods by region stratum
+
+```{r}
+
+knowledge_levels <- c("modern", "traditional", "no_knowledge")
+
+dhs_final_region <- dhs_final %>%
+  mutate(region = fct_relevel(region, "Chin", "Kachin", "Kayah", "Kayin", "Mon", "Rakhine", "Shan", "Ayeyarwady", "Bago", "Magway", "Mandalay", "Naypyitaw", "Sagaing", "Tanintharyi", "Yangon"))
+
+
+plot_knowledge_region <- dhs_final_region %>% 
+  filter(!is.na(region)) %>% 
+  ggplot(aes(x = region, fill = knowledge)) +
+  geom_bar() +
+  scale_fill_manual(values = c("purple", "pink", "red"),
+                    labels = knowledge_levels) + 
+  labs(title = "Knowledge of Contraceptive Methods", 
+       x = "States and Regions", y = "Number of Respondents", fill = "Contraceptive Methods") + 
+  theme(legend.position = "right", plot.title = element_text(size = 8)) + 
+  ylim(0, 1200) +
+  coord_flip()
+
+plot_knowledge_region
+```
+
+### Knowledge of contraceptive methods by education stratum
+
+```{r}
+knowledge_levels <- c("modern", "traditional", "no_knowledge")
+dhs_final_education <- dhs_final %>%
+  mutate(education = fct_relevel(education, "no_education", "primary", "secondary", "higher"))
+
+
+plot_knowledge_education <- dhs_final_education %>% 
+  filter(!is.na(education)) %>% 
+  ggplot(aes(x = education, fill = knowledge), labels = c("modern", "traditional", "no knowledge")) +
+  geom_bar() +
+  labs(title = "Knowledge of Contraceptive Methods among Women aged 15-49 years by Education",
+       x = "Education Level", y = "Number of Respondents", fill = "Contraceptive Methods") + 
+  theme(legend.position = "right", plot.title = element_text(size = 8)) +
+  ylim(0, 5500)
+
+plot_knowledge_education
+```
+
+### Knowledge of contraceptive methods among all women
+
+```{r}
+
+total_respondents <- nrow(dhs_final)
+
+method_counts <- dhs_final %>%
+  count(methods)
+
+plot_knowledge <- method_counts %>%
+  mutate(proportion = n / total_respondents) %>% 
+  mutate(methods = reorder(methods, proportion)) %>% 
+  ggplot(aes(x = methods, y = proportion)) +
+  geom_bar(stat = "identity", fill = "skyblue", width = 0.2) +  
+  geom_point(color = "red", size = 3, shape = 8, fill = "maroon") +  
+  labs(title = "Proportion of Contraceptive Knowledge",
+       x = "Methods",
+       y = "Percentage") +
+  scale_y_continuous(labels = scales::percent_format(scale = 100)) +
+  theme(legend.position = "right",
+        plot.title = element_text(size = 8)) +
+  theme_light() +
+  coord_flip()
+  
+plot_knowledge
+
+```
+
+### Proportion of practice of contraceptive methods among women who are currently married
+
+```{r}
+dhs_married <- dhs_final %>% 
+    filter(marital_status == "married")
+
+
+practice_proportion <- table(dhs_married$practice)
+
+slice_colors <- c("blue", "green", "brown")
+
+pie_p <- pie(practice_proportion, main = "Proportion of Contraceptive Methods Used among Currently Married Women Aged 15-49 Years", cex = 1, angle = 45,radius = 0.9, col = slice_colors, labels = paste0(names(practice_proportion), ", ", practice_proportion, ", ", round(100 * practice_proportion / sum(practice_proportion), 1), "%" ))
+```
+
+### practice of contraceptive methods by residence stratum
+
+```{r}
+
+plot_practice_residence <- dhs_married %>% 
+  filter(!is.na(residence)) %>% 
+  ggplot(aes(x = residence, fill = practice)) +
+  geom_bar() +
+  scale_fill_manual(values = c("blue", "green", "brown"),
+                    labels = c("modern", "traditional", "no_current_use")) +
+  labs(title = "Contraceptive Methods Used", x = "Residence", y = "Number of Current Married Women", fill = "Contraceptive Methods") +
+  theme(legend.position = "right", plot.title = element_text(size = 8)) +
+  ylim(0, 10000) 
+
+plot_practice_residence
+```
+
+### Practice of contraceptive methods by region stratum
+
+```{r}
+practice_levels <- c("modern", "traditional", "no_current_use")
+
+plot_practice_region <- dhs_final %>% 
+  filter(!is.na(region)) %>% 
+  ggplot(aes(x = region, fill = practice)) +
+  geom_bar() + 
+  scale_fill_manual(values = c("purple", "pink", "red"),
+                    labels = practice_levels) + 
+  labs(title = "Contraceptive Methods Used ",
+       x = "States and Regions", y = "Number of Current Married Women", fill = "Contraceptive Methods") +  # Add axis labels
+  theme(legend.position = "right", plot.title = element_text(size = 8)) + 
+  ylim(0, 1100) +
+  coord_flip()
+
+plot_practice_region
+```
+
+### Practice of contraceptive methods by education
+
+```{r}
+dhs_final_education <- dhs_married %>%
+  mutate(education = fct_relevel(education, "no_education", "primary", "secondary", "higher"))
+
+plot_practice_education <- dhs_final_education %>% 
+  filter(!is.na(education)) %>% 
+  ggplot(aes(x = education, fill = practice), 
+         labels = practice_levels) +
+  geom_bar() + 
+  labs(title = "Contraceptive Methods Used among Current Married Women aged 15-49 years by Education", 
+       x = "Education Level", y = "Number of Current Married Women", fill = "Contraceptive Methods") +  
+  theme(legend.position = "right", plot.title = element_text(size = 8)) +
+  ylim(0, 5500)
+
+plot_practice_education
+```
+
+## Contraceptive methods being used among currently married women
+
+```{r}
+plot_practice <- dhs_married %>%
+  filter(methods != "no_use") %>%
+  count(methods) %>%
+  mutate(proportion = n / sum(n)) %>%
+  mutate(methods = reorder(methods, proportion)) %>%
+  ggplot(aes(x = methods, y = proportion)) +
+  geom_bar(stat = "identity", fill = "skyblue", width = 0.2) +  
+  geom_point(color = "red", size = 3, shape = 8, fill = "maroon") +  
+  labs(title = "Proportion of Contraceptive Methods Used",
+       x = "Methods",
+       y = "Percentage") +
+  scale_y_continuous(labels = scales::percent_format(scale = 100)) +
+  theme(legend.position = "right",
+        plot.title = element_text(size = 8)) +
+  theme_light() +
+  coord_flip()
+
+plot_practice
+```
+
+## Knowledge Vs Practice
+
+### Knowledge Vs Usage of Contraceptive Methods among Women Aged 15-49 Years by Residence
+
+```{r}
+plot_knowledge_residence + plot_practice_residence +  plot_layout(guides = 'collect') + plot_annotation(title = 'Knowledge Vs Usage of Contraceptive Methods by Residence', caption = 'Comparing knowledge of contraceptive among all respondents versus practice among current married women', theme = theme(plot.title = element_text(face = "bold")))
+```
+
+### Knowledge Vs Usage of Contraceptive Methods among Women Aged 15-49 Years by State/Region
+
+```{r}
+plot_knowledge_region + plot_practice_region +  plot_layout(guides = 'collect') + plot_annotation(title = 'Knowledge Vs Usage of Contraceptive Methods by State/Region', caption = 'Comparing knowledge of contraceptive among all respondents versus practice among current married women', theme = theme(plot.title = element_text(face = "bold")))
+```
+
+### Knowledge Vs Usage of Contraceptive Methods among Women Aged 15-49 Years by Education
+
+```{r}
+plot_knowledge_education + plot_practice_education +  plot_layout(guides = 'collect') + plot_annotation(title = 'Knowledge Vs Usage of Contraceptive Methods by Education', caption = 'Comparing knowledge of contraceptive among all respondents versus practice among current married women', theme = theme(plot.title = element_text(face = "bold")))
+```
+
+### Knowledge vs Usage of Contraceptive Methods
+
+```{r}
+plot_knowledge + plot_practice +  plot_layout(guides = 'collect') +   
+   plot_annotation(title = 'Knowledge Vs Usage of Contraceptive Methods', caption = 'Comparing knowledge of contraceptive among all respondents versus practice among current married women', theme = theme(plot.title = element_text(face = "bold")))
+```
+
+## Data analysis
+
+### Checking levels and releveling for regression model
+
+-   Exposure variables - residence, education, age, income
+-   Outcome variables (binary outcome) - knowledge, practice
+
+```{r}
+levels(factor(dhs_final$education))
+levels(factor(dhs_final$residence))
+levels(factor(dhs_final$knowledge))
+levels(factor(dhs_final$practice))
+```
+
+### Transforming binary outcome for reserach outcome
+
+-   knowledge levels ("modern", no_knowledge", "traditional") to ("0" Vs "1")
+-   practice levels ("modern", "not_current_use", "traditional") to ("0" vs "1")
+
+```{r}
+dhs_final_knowledge <- dhs_final %>% 
+  mutate(knowledge = case_when(knowledge == "no_knowledge" ~ 0,
+                               knowledge == "modern" | knowledge == "traditional" ~ 1))
+```
+
+```{r}
+dhs_married_practice <- dhs_married %>% 
+mutate(practice = case_when(practice == "not_current_use" ~ 0,
+                            practice == "modern" | practice == "traditional" ~ 1))
+```
+
+```{r}
+dhs_final_knowledge_f <- dhs_final_knowledge %>% 
+  mutate(knowledge = factor(knowledge))
+
+dhs_final_knowledge_f
+
+dhs_married_practice_f <- dhs_married_practice %>% 
+  mutate(practice = factor(practice))
+
+dhs_married_practice_f
+```
+
+```{r}
+levels(factor(dhs_married_practice_f$practice))
+levels(factor(dhs_final_knowledge_f$knowledge))
+```
+
+```{r}
+dhs_final_knowledge_f$education <- relevel(factor(dhs_final_knowledge_f$education), ref = "no_education")
+```
+
+```{r}
+levels(factor(dhs_final_knowledge_f$education))
+```
+
+### Logistic regression model for knowledge stratified by residence and education
+
+```{r}
+knowledge_model <- glm(knowledge ~ residence + education, family = binomial(link = "logit"), data = dhs_final_knowledge_f)
+
+summary(knowledge_model)
+```
+
+```{r}
+library(broom)
+```
+
+```{r}
+knowledge_model %>% tidy(conf.int = TRUE, exponentiate = TRUE)
+```
+
+### Logistic regression model for knowledge stratified by residence and education
+
+```{r}
+dhs_married_practice_f$education <- relevel(factor(dhs_married_practice_f$education), ref = "no_education")
+```
+
+```{r}
+practice_model <- glm(practice ~ residence + education, family = binomial(link = "logit"), data = dhs_married_practice_f)
+
+summary(practice_model)
+```
+
+```{r}
+practice_model %>% tidy(conf.int = TRUE, exponentiate = TRUE)
+```
+
+# We will continue modifications of visualized plots and data analysis after this proposal.
