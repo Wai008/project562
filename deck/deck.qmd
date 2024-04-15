@@ -1,5 +1,5 @@
 ---
-title: "Contraceptive Knowledge, Practice & Unmet need"
+title: "Contraceptive Knowledge, Practice & Unmet Need in Myanmar"
 author: Hnin Thuzar Lwin & Wai Linn
 format: 
   revealjs:
@@ -557,7 +557,7 @@ kel_plot <- local_ke %>%
   mutate(education = factor(education, levels = c("no education", "primary", "secondary", "higher"))) %>%
   ggplot(aes(x = education, y = knowledge, color = location_bi, group = location_bi)) +
   geom_point() +
-  geom_smooth(method = lm) +
+  geom_smooth(se = FALSE, method = lm) +
   facet_wrap(~location_bi) +
   scale_color_brewer(palette = "Set1")+
   scale_y_continuous(labels = scales::percent_format(scale = 100), 
@@ -573,7 +573,7 @@ kel_plot <- local_ke %>%
 krl_plot <- local_kr %>%
   ggplot(aes(x = residence, y = knowledge, color = location_bi, group = location_bi)) +
   geom_point() +
-  geom_smooth(method = lm) +
+  geom_smooth(se = FALSE, method = lm) +
   facet_wrap(~location_bi) +
   scale_color_brewer(palette = "Set1")+
   scale_y_continuous(labels = scales::percent_format(scale = 100), 
@@ -590,7 +590,7 @@ kwl_plot <- local_kw %>%
   mutate(wealth_index = factor(wealth_index, levels = c("poorest", "poorer", "middle", "richer", "richest"))) %>%
   ggplot(aes(x = wealth_index, y = knowledge, color = location_bi, group = location_bi)) +
   geom_point() +
-  geom_smooth(method = lm) +
+  geom_smooth(se = FALSE, method = lm) +
   facet_wrap(~location_bi) +
   scale_color_brewer(palette = "Set1")+
   scale_y_continuous(labels = scales::percent_format(scale = 100), 
@@ -662,7 +662,7 @@ pel_plot <- local_pe %>%
   mutate(education = factor(education, levels = c("no education", "primary", "secondary", "higher"))) %>%
   ggplot(aes(x = education, y = practice, color = location_bi, group = location_bi)) +
   geom_point() +
-  geom_smooth(method = lm) +
+  geom_smooth(se = FALSE, method = lm) +
   facet_wrap(~location_bi) +
   scale_color_brewer(palette = "Set1")+
   scale_y_continuous(labels = scales::percent_format(scale = 100), 
@@ -679,7 +679,7 @@ pel_plot <- local_pe %>%
 prl_plot <- local_pr %>%
   ggplot(aes(x = residence, y = practice, color = location_bi, group = location_bi)) +
   geom_point() +
-  geom_smooth(method = lm) +
+  geom_smooth(se = FALSE, method = lm) +
   facet_wrap(~location_bi) +
   scale_color_brewer(palette = "Set1")+
   scale_y_continuous(labels = scales::percent_format(scale = 100), 
@@ -696,7 +696,7 @@ pwl_plot <- local_pw %>%
   mutate(wealth_index = factor(wealth_index, levels = c("poorest", "poorer", "middle", "richer", "richest"))) %>%
   ggplot(aes(x = wealth_index, y = practice, color = location_bi, group = location_bi)) +
   geom_point() +
-  geom_smooth(method = lm) +
+  geom_smooth(se = FALSE, method = lm) +
   facet_wrap(~location_bi) +
   scale_color_brewer(palette = "Set1")+
   scale_y_continuous(labels = scales::percent_format(scale = 100), 
@@ -770,7 +770,7 @@ uel_plot <- local_ue %>%
   mutate(education = factor(education, levels = c("no education", "primary", "secondary", "higher"))) %>%
   ggplot(aes(x = education, y = unmet_need, color = location_bi, group = location_bi)) +
   geom_point() +
-  geom_smooth(method = lm) +
+  geom_smooth(se = FALSE, method = lm) +
   facet_wrap(~location_bi) +
   scale_color_brewer(palette = "Set1")+
   scale_y_continuous(labels = scales::percent_format(scale = 100), 
@@ -786,7 +786,7 @@ uel_plot <- local_ue %>%
 url_plot <- local_ur %>%
   ggplot(aes(x = residence, y = unmet_need, color = location_bi, group = location_bi)) +
   geom_point() +
-  geom_smooth(method = lm) +
+  geom_smooth(se = FALSE, method = lm) +
   facet_wrap(~location_bi) +
   scale_color_brewer(palette = "Set1")+
   scale_y_continuous(labels = scales::percent_format(scale = 100), 
@@ -803,7 +803,7 @@ uwl_plot <- local_uw %>%
   mutate(wealth_index = factor(wealth_index, levels = c("poorest", "poorer", "middle", "richer", "richest"))) %>%
   ggplot(aes(x = wealth_index, y = unmet_need, color = location_bi, group = location_bi)) +
   geom_point() +
-  geom_smooth(method = lm) +
+  geom_smooth(se = FALSE, method = lm) +
   facet_wrap(~location_bi) +
   scale_color_brewer(palette = "Set1")+
   scale_y_continuous(labels = scales::percent_format(scale = 100), 
@@ -868,7 +868,6 @@ method_use
 ```
 
 
-
 ## Multivariate regression analysis
 
 
@@ -879,7 +878,7 @@ method_use
 # Exposure: location and covariates (age, residence, education, wealth)
 # Outcome: contraceptive practice 
 
-local_vs_prac_model <- svyglm(practice ~ location_bi + age + education + wealth_index, design = mysurvey, family = binomial(link = "logit"))
+local_vs_prac_model <- svyglm(practice ~ location_bi + residence + age + education + wealth_index, design = mysurvey, family = binomial(link = "logit"))
 ```
 
 ```{r}
@@ -907,7 +906,7 @@ practice_model <- local_vs_prac_model %>%
 # Exposure: location and covariates (age, residence, education, wealth)
 # Outcome: contraceptive unmet need
 
-local_vs_unmet_model <- svyglm(unmet_need ~ location_bi + age + residence + education + wealth_index, design = mysurvey2, family = binomial(link = "logit"))
+local_vs_unmet_model <- svyglm(unmet_need ~ location_bi + residence + age + education + wealth_index, design = mysurvey2, family = binomial(link = "logit"))
 ```
 
 
@@ -948,6 +947,7 @@ unmet_model
 
 
 ::: {style="text-align: center; display: flex; justify-content: center; align-items: center; flex-direction: column; font-size: 120%; margin-top: 200px; "}
+
 ## Thank You!! {background-image="https://images.unsplash.com/photo-1576063513230-e65b5ed1a3a0?q=80&w=2013&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" background-size="contain" background-opacity="0.5"}
 
 :::
