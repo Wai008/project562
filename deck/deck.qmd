@@ -942,7 +942,7 @@ unmet_model
 
 ## Conclusions
 
-- Our findings underscore disparities in knowledge, practice, and unmet needs underscored across demographics. 
+- Our findings underscore disparities in knowledge, practice, and unmet needs across demographics. 
 - Sampling weights in our analysis enhance representativeness
 - However, there are some limitations such as unaccounted confounders and data constraints.
 - Despite limitations, results remain valuable for informing policy and guiding interventions.
