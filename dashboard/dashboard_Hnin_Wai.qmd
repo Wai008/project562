@@ -16,7 +16,461 @@ library(bslib)
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(sf)
+library(haven)
+library(survey)
 ```
+
+
+```{r}
+# data importing
+
+dhs_mm <- read_csv(here::here("data", "dhs_mm.csv"))
+
+# Variable selection based on research question
+
+dhs_select <- dhs_mm %>% 
+  select(caseid, v005, v013, v021, v023, v024, v025, v106, v190, v301, v312, v313, v502, v626a)
+
+
+# Creating new and modifying existing variables  
+
+dhs_final <- dhs_select %>% 
+  mutate(wt = v005/1000000,
+         psu = v021,
+         strat = v023) %>% # sampling weight
+  filter(v502 == 1) %>% # current married women
+  mutate(
+    age = case_when(
+      v013 == 1 ~ "15-19",
+      v013 == 2 ~ "20-24",
+      v013 == 3 ~ "25-29",
+      v013 == 4 ~ "30-34",
+      v013 == 5 ~ "35-39",
+      v013 == 6 ~ "40-44",
+      v013 == 7 ~ "45-49"
+    ),
+    location = case_when(
+      v024 == 1 ~ "Kachin",
+      v024 == 2 ~ "Kayah",
+      v024 == 3 ~ "Kayin",
+      v024 == 4 ~ "Chin",
+      v024 == 5 ~ "Sagaing",
+      v024 == 6 ~ "Tanintharyi",
+      v024 == 7 ~ "Bago",
+      v024 == 8 ~ "Magway",
+      v024 == 9 ~ "Mandalay",
+      v024 == 10 ~ "Mon",
+      v024 == 11 ~ "Rakhine",
+      v024 == 12 ~ "Yangon",
+      v024 == 13 ~ "Shan",
+      v024 == 14 ~ "Ayeyarwady",
+      v024 == 15 ~ "Naypyitaw"
+    ),
+    residence = case_when(
+      v025 == 1 ~ "urban",
+      v025 == 2 ~ "rural"
+    ),
+    education = case_when(
+      v106 == 0 ~ "no education",
+      v106 == 1 ~ "primary",
+      v106 == 2 ~ "secondary",
+      v106 == 3 ~ "higher"
+    ),
+    wealth_index = case_when(
+      v190 == 1 ~ "poorest",
+      v190 == 2 ~ "poorer",
+      v190 == 3 ~ "middle",
+      v190 == 4 ~ "richer",
+      v190 == 5 ~ "richest"
+    ),
+    method = case_when(
+      v312 == 0 ~ "no_use",
+      v312 == 1 ~ "pill",
+      v312 == 2 ~ "IUD",
+      v312 == 3 ~ "injection",
+      v312 == 5 ~ "male_condom",
+      v312 == 6 ~ "female_sterilization",
+      v312 == 7 ~ "male_sterilization",
+      v312 == 8 ~ "periodic_abstinence",
+      v312 == 9 ~ "withdrawal",
+      v312 == 10 ~ "other_traditional",
+      v312 == 11 ~ "implant",
+      v312 == 13 ~ "lac_amenorrhoea",
+      v312 == 17 ~ "other_modern")
+  ) %>% 
+  mutate(
+    knowledge = ifelse(v301 %in% c(3,2), 1, 0),
+    practice = ifelse(v313 %in% c(3,2,1), 1,0),
+    location_bi = ifelse(v024 %in% c(1, 2, 3, 4, 10, 11 & 13), 0, 1)
+  ) %>% 
+  mutate(
+    location_bi = case_when(
+      location_bi == 0 ~ "state",
+      location_bi == 1 ~ "region"
+    )
+  )
+```
+
+```{r}
+# sampling weight
+
+mysurvey <- svydesign(ids = ~psu, strata = ~strat, weights =~wt, data = dhs_final)
+```
+
+# Contraceptive Knowledge
+
+## Row {.tabset}
+
+### age
+
+```{r}
+
+know_a <- svyby(
+  ~knowledge,
+  by = ~age,
+  design = mysurvey,
+  FUN = svymean,
+  vartype = c("se", "ci")
+) %>% 
+  select(knowledge, age) %>% 
+  ggplot(aes(age, knowledge)) +
+  geom_col(aes(fill = age)) + 
+  scale_y_continuous(labels = scales::percent_format(scale = 100))+
+  labs(x = "Age Group", y = "Contraceptive Knowledge", title = "Younger and older age groups have lesser knowledge of contraception") + 
+  theme_minimal() +
+  theme(legend.position = "none")
+
+know_a
+```
+
+### education
+
+```{r}
+know_e <- svyby(
+  ~knowledge,
+  by = ~education,
+  design = mysurvey,
+  FUN = svymean,
+  vartype = c("se", "ci")
+) %>% 
+  mutate(education = factor(education, levels = c("no education", "primary", "secondary", "higher"))) %>% 
+  ggplot(aes(education, knowledge)) +
+  geom_col(aes(fill = education)) + 
+  scale_y_continuous(labels = scales::percent_format(scale = 100))+
+  labs(x = "Education level", y = "Contraceptive Knowledge", title = "Women with lower education level have lesser knowledge of contraception") + 
+  theme_minimal() +
+  theme(legend.position = "none")
+
+know_e
+```
+
+### residence
+
+```{r}
+
+know_r <- svyby(
+  ~knowledge,
+  by = ~residence,
+  design = mysurvey,
+  FUN = svymean,
+  vartype = c("se", "ci")
+) %>% 
+  ggplot(aes(residence, knowledge)) +
+  geom_col(aes(fill = residence)) + 
+  scale_y_continuous(labels = scales::percent_format(scale = 100))+
+  labs(x = "Residence", y = "Contraceptive Knowledge", title = "Women frm rural have slightly less knowledge") + 
+  theme_minimal() +
+  theme(legend.position = "none")
+
+know_r
+```
+
+### location
+
+```{r}
+know_l <- svyby(
+  ~knowledge,
+  by = ~location_bi,
+  design = mysurvey,
+  FUN = svymean,
+  vartype = c("se", "ci")
+) %>% 
+  ggplot(aes(location_bi, knowledge)) +
+  geom_col(aes(fill = location_bi)) + 
+  scale_y_continuous(labels = scales::percent_format(scale = 100))+
+  labs(x = "State/Region", y = "Contraceptive Knowledge", title = "No significant difference of knowledge between state and region") + 
+  theme_minimal() +
+  theme(legend.position = "none")
+
+know_l
+```
+
+### wealth index 
+
+```{r}
+
+know_w <- svyby(
+  ~knowledge,
+  by = ~wealth_index,
+  design = mysurvey,
+  FUN = svymean,
+  vartype = c("se", "ci")
+) %>% 
+  mutate(wealth_index = factor(wealth_index, levels = c("poorest", "poorer", "middle", "richer", "richest"))) %>% 
+   ggplot(aes(wealth_index, knowledge)) +
+  geom_col(aes(fill = wealth_index)) + 
+  scale_y_continuous(labels = scales::percent_format(scale = 100))+
+  labs(x = "Wealth Index", y = "Contraceptive Knowledge", title = "Relatively poorer women have lesser knowledge of contraception") + 
+  theme_minimal() +
+  theme(legend.position = "none")
+
+know_w
+
+```
+
+
+# Contraceptive practice 
+
+## Row {.tabset}
+
+### age
+
+```{r}
+#| title: practice by age group
+
+
+prac_a <- svyby(
+  ~practice,
+  by = ~age,
+  design = mysurvey,
+  FUN = svymean,
+  vartype = c("se", "ci")
+) %>% 
+  select(practice, age) %>% 
+  ggplot(aes(age, practice)) +
+  geom_col(aes(fill = age)) + 
+  scale_y_continuous(labels = scales::percent_format(scale = 100))+
+  labs(x = "Age Group", y = "Contraceptive Practice", title = "Younger and older age groups have lower contraceptive use") + 
+  theme_minimal() +
+  theme(legend.position = "none")
+
+prac_a
+```
+
+### education
+
+```{r}
+prac_e <- svyby(
+  ~practice,
+  by = ~education,
+  design = mysurvey,
+  FUN = svymean,
+  vartype = c("se", "ci")
+) %>% 
+  mutate(education = factor(education, levels = c("no education", "primary", "secondary", "higher"))) %>% 
+  ggplot(aes(education, practice)) +
+  geom_col(aes(fill = education)) + 
+  scale_y_continuous(labels = scales::percent_format(scale = 100))+
+  labs(x = "Education level", y = "Contraceptive Practice", title = "Women with lower level of education have significantly low use of contraception") + 
+  theme_minimal() +
+  theme(legend.position = "none")
+
+prac_e
+```
+
+### residence
+
+```{r}
+
+prac_r <- svyby(
+  ~practice,
+  by = ~residence,
+  design = mysurvey,
+  FUN = svymean,
+  vartype = c("se", "ci")
+) %>% 
+  ggplot(aes(residence, practice)) +
+  geom_col(aes(fill = residence)) + 
+  scale_y_continuous(labels = scales::percent_format(scale = 100))+
+  labs(x = "Residence", y = "Contraceptive Practice", title = "Wome from rural have lower contraceptive use") + 
+  theme_minimal() +
+  theme(legend.position = "none")
+prac_r
+```
+
+### location
+
+```{r}
+prac_l <- svyby(
+  ~practice,
+  by = ~location_bi,
+  design = mysurvey,
+  FUN = svymean,
+  vartype = c("se", "ci")
+) %>% 
+  ggplot(aes(location_bi, practice)) +
+  geom_col(aes(fill = location_bi)) + 
+  scale_y_continuous(labels = scales::percent_format(scale = 100))+
+  labs(x = "Location", y = "Contraceptive Practice", title = "Women from state have lower contraceptive use") + 
+  theme_minimal() +
+  theme(legend.position = "none")
+
+prac_l
+```
+
+### wealth index 
+
+```{r}
+
+prac_w <- svyby(
+  ~practice,
+  by = ~wealth_index,
+  design = mysurvey,
+  FUN = svymean,
+  vartype = c("se", "ci")
+) %>% 
+  mutate(wealth_index = factor(wealth_index, levels = c("poorest", "poorer", "middle", "richer", "richest"))) %>% 
+   ggplot(aes(wealth_index, practice)) +
+  geom_col(aes(fill = wealth_index)) + 
+  scale_y_continuous(labels = scales::percent_format(scale = 100))+
+  labs(x = "Wealth Index", y = "Contraceptive Practice", title = "Relatively poorer women have lower contraceptive use") + 
+  theme_minimal() +
+  theme(legend.position = "none")
+
+prac_w
+
+```
+
+
+# Unmet need
+
+```{r}
+# To filter only unmet and met need from total cohort which includes no unmet need, never had sex ... check details in data dictionary
+
+dhs_unmet <- dhs_final %>% 
+  filter(v626a %in% c(1,2,3,4)) %>% 
+  mutate(unmet_need = ifelse(v626a %in% c(1,2), 1, 0))
+```
+
+
+```{r}
+# another survey weight for unmet need because of dataset changes
+
+mysurvey2 <- svydesign(ids = ~psu, strata = ~strat, weights =~wt, data = dhs_unmet)  
+```
+
+
+## Row {.tabset}
+
+### age
+
+```{r}
+#| title: unmet need by age group
+
+unmet_a <- svyby(
+  ~unmet_need,
+  by = ~age,
+  design = mysurvey2,
+  FUN = svymean,
+  vartype = c("se", "ci")
+) %>% 
+ ggplot(aes(age, unmet_need)) +
+  geom_col(aes(fill = age)) + 
+  scale_y_continuous(labels = scales::percent_format(scale = 100))+
+  labs(x = "Age Group", y = "Unmet Need", title = "Younger and older age groups have higher contraceptive unmet need") + 
+  theme_minimal() +
+  theme(legend.position = "none")
+
+unmet_a
+```
+
+### education
+
+```{r}
+unmet_e <- svyby(
+  ~unmet_need,
+  by = ~education,
+  design = mysurvey2,
+  FUN = svymean,
+  vartype = c("se", "ci")
+) %>% 
+  mutate(education = factor(education, levels = c("no education", "primary", "secondary", "higher"))) %>% 
+  ggplot(aes(education, unmet_need)) +
+  geom_col(aes(fill = education)) + 
+  scale_y_continuous(labels = scales::percent_format(scale = 100))+
+  labs(x = "Education", y = "Unmet Need", title = "Women with lower level of education have higher contraceptive unmet need") + 
+  theme_minimal() +
+  theme(legend.position = "none")
+
+unmet_e
+```
+
+### residence
+
+```{r}
+#| title: unmet need by residence
+
+unmet_r <- svyby(
+  ~unmet_need,
+  by = ~residence,
+  design = mysurvey2,
+  FUN = svymean,
+  vartype = c("se", "ci")
+) %>% 
+  ggplot(aes(residence, unmet_need)) +
+  geom_col(aes(fill = residence)) + 
+  scale_y_continuous(labels = scales::percent_format(scale = 100))+
+  labs(x = "Residence", y = "Unmet Need", title = "Women from rural have higher contraceptive unmet need") + 
+  theme_minimal() +
+  theme(legend.position = "none")
+
+unmet_r
+```
+
+### location
+
+```{r}
+
+unmet_l <- svyby(
+  ~unmet_need,
+  by = ~location_bi,
+  design = mysurvey2,
+  FUN = svymean,
+  vartype = c("se", "ci")
+) %>% 
+  ggplot(aes(location_bi, unmet_need)) +
+  geom_col(aes(fill = location_bi)) + 
+  scale_y_continuous(labels = scales::percent_format(scale = 100))+
+  labs(x = "Location", y = "Unmet Need", title = "Women from state have higher contraceptive unmet need") + 
+  theme_minimal() +
+  theme(legend.position = "none")
+
+unmet_l
+```
+
+### wealth index 
+
+```{r}
+
+unmet_w <- svyby(
+  ~unmet_need,
+  by = ~wealth_index,
+  design = mysurvey2,
+  FUN = svymean,
+  vartype = c("se", "ci")
+) %>% 
+  mutate(wealth_index = factor(wealth_index, levels = c("poorest", "poorer", "middle", "richer", "richest"))) %>% 
+  ggplot(aes(wealth_index, unmet_need)) +
+  geom_col(aes(fill = wealth_index)) + 
+  scale_y_continuous(labels = scales::percent_format(scale = 100))+
+  labs(x = "Wealth Index", y = "Unmet Need", title = "Relatively poorer women have higher contraceptive unmet need") + 
+  theme_minimal() +
+  theme(legend.position = "none")
+
+unmet_w
+
+```
+
 
 
 ```{r}
@@ -65,7 +519,8 @@ myanmar_all <- myanmar_practice %>%
 ```
 
 
-# {.sidebar}
+
+## {.sidebar}
 
 
 ```{r}
@@ -96,12 +551,22 @@ myanmar_all %>%
     cols = starts_with("fp"), 
     names_to = "fp_service", 
     values_to = "fp_proportion"
-  ) %>% 
-    ggplot()+
-    geom_sf(aes(fill = input$fp_service, color = name, group = fp_proportion)) + 
+  )
+
+})
+
+output$mapdata <- renderTable({
+  map_data()
+})
+
+
+output$map <- renderPlot({
+  p_map <- ggplot(map_data())+
+    geom_sf(aes(fill = fp_service, color = name, group = fp_proportion)) + 
     theme_void() +
     theme(legend.position = "none")
-
+  
+  p_map
 })
 ```
 
@@ -114,7 +579,7 @@ plotOutput('map')
 # Data 
 
 ```{r}
-tableOutput('data')
+tableOutput('mapdata')
 ```
 
 
