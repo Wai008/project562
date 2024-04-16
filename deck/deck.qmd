@@ -9,6 +9,7 @@ format:
       data-background-size: 100%
       data-background-opacity: "0.5"
     date: today
+    
 ---
 
 ```{r}
@@ -845,7 +846,7 @@ unmet_plots
 :::
 
 
-## Common contracepive methods
+## Common contraceptive methods
 
 ```{r}
 # bonus info
@@ -941,10 +942,11 @@ unmet_model
 
 ## Conclusions
 
-- Disparities in knowledge, practice, and unmet needs underscored across demographics. (for instance, rural areas within specific regions face greater challenges.)
-- Our findings enhanced by sampling weights but limited by unaccounted confounders and data constraints.
+- Our findings underscore disparities in knowledge, practice, and unmet needs underscored across demographics. 
+- Sampling weights in our analysis enhance representativeness
+- However, there are some limitations such as unaccounted confounders and data constraints.
 - Despite limitations, results remain valuable for informing policy and guiding interventions.
-- Critical for ongoing evaluation of reproductive health projects and contraceptive provision initiatives.
+- Critical for ongoing evaluation of reproductive health projects.
 
 
 
